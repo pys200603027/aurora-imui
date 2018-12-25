@@ -10,6 +10,11 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 
+import com.zhihu.matisse.Matisse;
+import com.zhihu.matisse.MimeType;
+import com.zhihu.matisse.filter.Filter;
+import com.zhihu.matisse.internal.entity.SelectionSpec;
+
 import java.util.List;
 
 import cn.jiguang.imui.chatinput.ChatInputView;
@@ -28,6 +33,7 @@ import pub.devrel.easypermissions.EasyPermissions;
 public class SimpeInputActivity extends AppCompatActivity implements View.OnTouchListener, OnMenuClickListener {
 
     ChatInputView chatInputView;
+    private static final int REQUEST_CODE_CHOOSE = 23;
 
     private final int RC_PHOTO = 0x0003;
 
@@ -46,20 +52,29 @@ public class SimpeInputActivity extends AppCompatActivity implements View.OnTouc
          * Should set menu container height once the ChatInputView has been initialized.
          * For perfect display, the height should be equals with soft input height.
          */
-        // TODO: 2018/12/24 关键点
         chatInputView.setMenuContainerHeight(819);
 
         // add Custom Menu View
+        Matisse.from(this)
+                .choose(MimeType.ofImage())
+                .countable(false)
+                .addFilter(new GifSizeFilter(320, 320, 5 * Filter.K * Filter.K))
+                .maxSelectable(9)
+                .originalEnable(true)
+                .maxOriginalSize(10)
+                .imageEngine(new Glide4Engine());
+//                .forDemo(REQUEST_CODE_CHOOSE)
+
         MenuManager menuManager = chatInputView.getMenuManager();
-//        menuManager.addCustomMenu("MY_CUSTOM",R.layout.menu_text_item,R.layout.menu_text_feature);
+        menuManager.addCustomMenu("MY_CUSTOM", R.layout.menu_text_item, R.layout.menu_text_feature);
 
         // Custom menu order
         menuManager.setMenu(Menu.newBuilder().
                 customize(true).
 //                setRight(Menu.TAG_SEND).
 //                setBottom(Menu.TAG_VOICE, Menu.TAG_EMOJI, Menu.TAG_GALLERY, Menu.TAG_CAMERA, "MY_CUSTOM").
-        setBottom(Menu.TAG_EMOJI, Menu.TAG_GALLERY).
-                        build());
+
+        setBottom(Menu.TAG_EMOJI, Menu.TAG_GALLERY, "MY_CUSTOM").build());
         menuManager.setCustomMenuClickListener(new CustomMenuEventListener() {
             @Override
             public boolean onMenuItemClick(String tag, MenuItem menuItem) {
@@ -79,6 +94,7 @@ public class SimpeInputActivity extends AppCompatActivity implements View.OnTouc
 //        chatInputView.setOnTouchListener(this);
         chatInputView.setMenuClickListener(this);
     }
+
 
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -144,5 +160,11 @@ public class SimpeInputActivity extends AppCompatActivity implements View.OnTouc
     @Override
     public boolean switchToEmojiMode() {
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
     }
 }
