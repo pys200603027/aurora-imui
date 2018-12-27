@@ -49,5 +49,5 @@ dependencies {
     //    implementation project(':chatinput')
     implementation(name: 'matisse-debug', ext: 'aar')
     implementation(name: 'chatinput-debug', ext: 'aar')
-    implementation project(':chatinputextra')
+    implementation project(':chatinput-extra')
 }
