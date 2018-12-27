@@ -1,58 +1,52 @@
 package water.android.io.simpleinputdemo;
 
-import android.Manifest;
-import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.MotionEvent;
+import android.util.Log;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
-
+import android.widget.ImageView;
 import com.zhihu.matisse.Matisse;
 import com.zhihu.matisse.MimeType;
+import com.zhihu.matisse.engine.ImageEngine;
 import com.zhihu.matisse.filter.Filter;
-import com.zhihu.matisse.internal.entity.SelectionSpec;
-
+import com.zhihu.matisse.listener.OnResultListener;
 import java.util.List;
 
-import cn.jiguang.imui.chatinput.ChatInputView;
 import cn.jiguang.imui.chatinput.listener.CustomMenuEventListener;
-import cn.jiguang.imui.chatinput.listener.OnMenuClickListener;
 import cn.jiguang.imui.chatinput.menu.Menu;
-import cn.jiguang.imui.chatinput.menu.MenuManager;
 import cn.jiguang.imui.chatinput.menu.view.MenuFeature;
 import cn.jiguang.imui.chatinput.menu.view.MenuItem;
-import cn.jiguang.imui.chatinput.model.FileItem;
-import pub.devrel.easypermissions.EasyPermissions;
+import water.android.io.chatinputextra.input.CustomInputView;
+import water.android.io.chatinputextra.input.CustomMenuManager;
+import water.android.io.chatinputextra.input.GifSizeFilter;
+import water.android.io.chatinputextra.input.Glide4Engine;
+import water.android.io.chatinputextra.input.OnMenuClickListenerWrapper;
 
 /**
  * 最简单使用逻辑
  */
-public class SimpeInputActivity extends AppCompatActivity implements View.OnTouchListener, OnMenuClickListener {
+public class SimpeInputActivity extends AppCompatActivity {
 
-    ChatInputView chatInputView;
+    CustomInputView chatInputView;
+    ImageView imageView;
     private static final int REQUEST_CODE_CHOOSE = 23;
 
     private final int RC_PHOTO = 0x0003;
-
-    private InputMethodManager mImm;
-    private Window mWindow;
+    ImageEngine imageEngine = new Glide4Engine();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_simpe_input);
-        this.mImm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        this.mWindow = getWindow();
-
         chatInputView = findViewById(R.id.chat_input);
+        imageView = findViewById(R.id.img);
         /**
          * Should set menu container height once the ChatInputView has been initialized.
          * For perfect display, the height should be equals with soft input height.
          */
-        chatInputView.setMenuContainerHeight(819);
+        chatInputView.setMenuContainerHeight(879);
 
         // add Custom Menu View
         Matisse.from(this)
@@ -62,19 +56,24 @@ public class SimpeInputActivity extends AppCompatActivity implements View.OnTouc
                 .maxSelectable(9)
                 .originalEnable(true)
                 .maxOriginalSize(10)
-                .imageEngine(new Glide4Engine());
-//                .forDemo(REQUEST_CODE_CHOOSE)
+                .imageEngine(new Glide4Engine())
+                .forCallback(new OnResultListener() {
+                    @Override
+                    public void onResult(int i, Intent intent) {
+                        Log.d("123", "i:" + i);
+                        List<Uri> uris = Matisse.obtainResult(intent);
+                        imageEngine.loadImage(imageView.getContext(), imageView.getWidth(), imageView.getHeight(), imageView, uris.get(0));
+                    }
+                });
 
-        MenuManager menuManager = chatInputView.getMenuManager();
-        menuManager.addCustomMenu("MY_CUSTOM", R.layout.menu_text_item, R.layout.menu_text_feature);
+        CustomMenuManager menuManager = chatInputView.getMenuManager();
+        menuManager.addCustomMenu("recorder", R.layout.im_menu_voice_item, R.layout.im_menu_voice_feature);
+        menuManager.addCustomMenu("photo", R.layout.im_menu_photo_item, R.layout.im_menu_photo_feature);
 
         // Custom menu order
         menuManager.setMenu(Menu.newBuilder().
                 customize(true).
-//                setRight(Menu.TAG_SEND).
-//                setBottom(Menu.TAG_VOICE, Menu.TAG_EMOJI, Menu.TAG_GALLERY, Menu.TAG_CAMERA, "MY_CUSTOM").
-
-        setBottom(Menu.TAG_EMOJI, Menu.TAG_GALLERY, "MY_CUSTOM").build());
+                setBottom("recorder", "photo", Menu.TAG_EMOJI).build());
         menuManager.setCustomMenuClickListener(new CustomMenuEventListener() {
             @Override
             public boolean onMenuItemClick(String tag, MenuItem menuItem) {
@@ -91,76 +90,9 @@ public class SimpeInputActivity extends AppCompatActivity implements View.OnTouc
                 }
             }
         });
-//        chatInputView.setOnTouchListener(this);
-        chatInputView.setMenuClickListener(this);
+        chatInputView.setMenuClickListener(new OnMenuClickListenerWrapper());
     }
 
-
-    @Override
-    public boolean onTouch(View view, MotionEvent motionEvent) {
-        switch (motionEvent.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                if (chatInputView.getMenuState() == View.VISIBLE) {
-                    chatInputView.dismissMenuLayout();
-                }
-                try {
-                    View v = getCurrentFocus();
-                    if (mImm != null && v != null) {
-                        mImm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                        mWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-                        view.clearFocus();
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                break;
-            case MotionEvent.ACTION_UP:
-                view.performClick();
-                break;
-            default:
-        }
-        return false;
-    }
-
-
-    @Override
-    public boolean onSendTextMessage(CharSequence input) {
-        return false;
-    }
-
-    @Override
-    public void onSendFiles(List<FileItem> list) {
-
-    }
-
-    @Override
-    public boolean switchToMicrophoneMode() {
-        return false;
-    }
-
-    @Override
-    public boolean switchToGalleryMode() {
-        String[] perms = new String[]{
-                Manifest.permission.READ_EXTERNAL_STORAGE
-        };
-
-        if (!EasyPermissions.hasPermissions(this, perms)) {
-            EasyPermissions.requestPermissions(this, "需要获取相册权限", RC_PHOTO, perms);
-        }
-        // If you call updateData, select photo view will try to update data(Last update over 30 seconds.)
-        chatInputView.getSelectPhotoView().updateData();
-        return true;
-    }
-
-    @Override
-    public boolean switchToCameraMode() {
-        return false;
-    }
-
-    @Override
-    public boolean switchToEmojiMode() {
-        return true;
-    }
 
     @Override
     public void onBackPressed() {

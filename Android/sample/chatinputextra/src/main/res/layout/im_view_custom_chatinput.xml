@@ -1,0 +1,85 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/aurora_bg_input_default"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/aurora_ll_input_container"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginTop="11dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginBottom="11dp"
+        android:background="@drawable/im_input_bg"
+        android:orientation="horizontal">
+
+        <cn.jiguang.imui.chatinput.emoji.widget.EmoticonsEditText
+            android:id="@+id/aurora_et_chat_input"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@null"
+            android:cursorVisible="true"
+            android:focusableInTouchMode="true"
+            android:gravity="center_vertical"
+            android:hint="输入新消息"
+            android:inputType="textMultiLine"
+            android:maxLength="600"
+            android:maxLines="4"
+            android:minHeight="48dp"
+            android:scrollbars="vertical"
+            android:textColor="#3a3a3a"
+            android:textColorHint="#b3b3b3"
+            android:textCursorDrawable="@drawable/aurora_edittext_cursor_bg"
+            android:textSize="18sp" />
+
+        <LinearLayout
+            android:id="@+id/aurora_ll_menuitem_container"
+            android:layout_width="100dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:orientation="horizontal" />
+
+        <TextView
+            android:id="@+id/tv_send"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="发送"
+            android:textColor="#000000"
+            android:textSize="16dp"
+            android:visibility="gone"
+            tools:visibility="visible" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/aurora_fl_menu_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center">
+
+        <include
+            android:id="@+id/aurora_rl_recordvoice_container"
+            layout="@layout/layout_chatinput_recordvoice" />
+
+        <cn.jiguang.imui.chatinput.photo.SelectPhotoView
+            android:id="@+id/aurora_view_selectphoto"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
+        <include
+            android:id="@+id/aurora_fl_camera_container"
+            layout="@layout/layout_chatinput_camera"
+            android:visibility="gone" />
+
+        <cn.jiguang.imui.chatinput.emoji.EmojiView
+            android:id="@+id/aurora_rl_emoji_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
+    </FrameLayout>
+</LinearLayout>
