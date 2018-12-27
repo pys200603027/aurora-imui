@@ -1,14 +1,14 @@
-package water.android.io.chatinputextra.input;
+package cn.jiguang.imui.chatinput.extra.input;
 
 import android.content.Context;
 import android.util.Log;
 import android.view.View;
 
+import cn.jiguang.imui.chatinput.R;
 import cn.jiguang.imui.chatinput.menu.Menu;
 import cn.jiguang.imui.chatinput.menu.collection.MenuCollection;
 import cn.jiguang.imui.chatinput.menu.view.MenuItem;
 import cn.jiguang.imui.chatinput.utils.ViewUtil;
-import water.android.io.chatinputextra.R;
 
 
 public class CustomMenuItemCollection extends MenuCollection {

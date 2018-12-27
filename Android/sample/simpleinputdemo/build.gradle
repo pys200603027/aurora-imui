@@ -28,12 +28,12 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 }
-
 repositories {
     flatDir {
         dirs 'libs'
     }
 }
+
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
@@ -46,8 +46,8 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.8.0'
     implementation 'it.sephiroth.android.library.imagezoom:library:1.0.4'
     implementation project(':messagelist')
-    //    implementation project(':chatinput')
-    implementation(name: 'matisse-debug', ext: 'aar')
-    implementation(name: 'chatinput-debug', ext: 'aar')
-    implementation project(':chatinput-extra')
+    implementation project(':chatinput')
+
+    implementation (name:'matisse-debug', ext:'aar')
+
 }

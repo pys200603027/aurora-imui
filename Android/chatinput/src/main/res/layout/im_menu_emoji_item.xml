@@ -18,7 +18,7 @@
                 android:layout_gravity="center"
                 android:clickable="false"
                 android:background="@android:color/transparent"
-                android:src="@mipmap/im_input_menu_emoj"/>
+                android:src="@drawable/im_input_menu_emoj"/>
 
         </FrameLayout>
 

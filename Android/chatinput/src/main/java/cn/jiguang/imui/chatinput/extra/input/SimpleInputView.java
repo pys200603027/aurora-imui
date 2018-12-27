@@ -1,4 +1,4 @@
-package water.android.io.chatinputextra.input;
+package cn.jiguang.imui.chatinput.extra.input;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -9,7 +9,8 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import water.android.io.chatinputextra.R;
+
+import cn.jiguang.imui.chatinput.R;
 
 
 /**

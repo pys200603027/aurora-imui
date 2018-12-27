@@ -21,4 +21,7 @@
     <string name="sdcard_not_prepare_toast">Sdcard not prepared</string>
     <string name="record_video_failed">Record video</string>
     <!-- chat input end -->
+
+    <string name="error_gif">长宽不小于 %1$dpx，且大小不超过 %2$sM。</string>
+    <string name="error_original">大小不超过 %1$sM。</string>
 </resources>

@@ -1,4 +1,4 @@
-package water.android.io.chatinputextra.input;
+package cn.jiguang.imui.chatinput.extra.input;
 
 import android.Manifest;
 import android.app.Activity;
@@ -49,6 +49,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.jiguang.imui.chatinput.R;
 import cn.jiguang.imui.chatinput.camera.CameraNew;
 import cn.jiguang.imui.chatinput.camera.CameraOld;
 import cn.jiguang.imui.chatinput.camera.CameraSupport;
@@ -74,7 +75,6 @@ import cn.jiguang.imui.chatinput.record.ProgressButton;
 import cn.jiguang.imui.chatinput.record.RecordControllerView;
 import cn.jiguang.imui.chatinput.record.RecordVoiceButton;
 import cn.jiguang.imui.chatinput.utils.SimpleCommonUtils;
-import water.android.io.chatinputextra.R;
 
 public class CustomInputView extends LinearLayout
         implements View.OnClickListener, TextWatcher, RecordControllerView.OnRecordActionListener,

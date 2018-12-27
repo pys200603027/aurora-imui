@@ -14,15 +14,15 @@ import com.zhihu.matisse.filter.Filter;
 import com.zhihu.matisse.listener.OnResultListener;
 import java.util.List;
 
+import cn.jiguang.imui.chatinput.extra.input.CustomInputView;
+import cn.jiguang.imui.chatinput.extra.input.CustomMenuManager;
+import cn.jiguang.imui.chatinput.extra.input.GifSizeFilter;
+import cn.jiguang.imui.chatinput.extra.input.Glide4Engine;
+import cn.jiguang.imui.chatinput.extra.input.OnMenuClickListenerWrapper;
 import cn.jiguang.imui.chatinput.listener.CustomMenuEventListener;
 import cn.jiguang.imui.chatinput.menu.Menu;
 import cn.jiguang.imui.chatinput.menu.view.MenuFeature;
 import cn.jiguang.imui.chatinput.menu.view.MenuItem;
-import water.android.io.chatinputextra.input.CustomInputView;
-import water.android.io.chatinputextra.input.CustomMenuManager;
-import water.android.io.chatinputextra.input.GifSizeFilter;
-import water.android.io.chatinputextra.input.Glide4Engine;
-import water.android.io.chatinputextra.input.OnMenuClickListenerWrapper;
 
 /**
  * 最简单使用逻辑

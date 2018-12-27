@@ -1,4 +1,4 @@
-package water.android.io.chatinputextra.input;
+package cn.jiguang.imui.chatinput.extra.input;
 
 import android.content.Context;
 import android.util.Log;
