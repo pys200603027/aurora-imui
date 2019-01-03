@@ -48,6 +48,6 @@ dependencies {
     implementation project(':messagelist')
     implementation project(':chatinput')
 
-    implementation (name:'matisse-debug', ext:'aar')
+    implementation (name:'matisse-debug-v1', ext:'aar')
 
 }

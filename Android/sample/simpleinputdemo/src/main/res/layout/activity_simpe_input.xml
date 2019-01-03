@@ -10,18 +10,16 @@
     <ImageView
         android:id="@+id/img"
         android:layout_width="match_parent"
-        android:layout_weight="1"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
 
     <cn.jiguang.imui.chatinput.extra.input.CustomInputView
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
         android:id="@+id/chat_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:inputMarginLeft="3dp"
         app:inputMarginRight="3dp"
-        app:showSelectAlbum="false" />
+        app:showSelectAlbum="false"
+        tools:layout_height="48dp" />
 
 </LinearLayout>

@@ -3,15 +3,19 @@ package water.android.io.simpleinputdemo;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+
 import com.zhihu.matisse.Matisse;
 import com.zhihu.matisse.MimeType;
 import com.zhihu.matisse.engine.ImageEngine;
 import com.zhihu.matisse.filter.Filter;
 import com.zhihu.matisse.listener.OnResultListener;
+import com.zhihu.matisse.ui.ActivityResultHelper;
+
 import java.util.List;
 
 import cn.jiguang.imui.chatinput.extra.input.CustomInputView;
@@ -46,7 +50,7 @@ public class SimpeInputActivity extends AppCompatActivity {
          * Should set menu container height once the ChatInputView has been initialized.
          * For perfect display, the height should be equals with soft input height.
          */
-        chatInputView.setMenuContainerHeight(879);
+        chatInputView.setMenuContainerHeight(819);
 
         // add Custom Menu View
         Matisse.from(this)
@@ -65,34 +69,32 @@ public class SimpeInputActivity extends AppCompatActivity {
                         imageEngine.loadImage(imageView.getContext(), imageView.getWidth(), imageView.getHeight(), imageView, uris.get(0));
                     }
                 });
-
-        CustomMenuManager menuManager = chatInputView.getMenuManager();
-        menuManager.addCustomMenu("recorder", R.layout.im_menu_voice_item, R.layout.im_menu_voice_feature);
-        menuManager.addCustomMenu("photo", R.layout.im_menu_photo_item, R.layout.im_menu_photo_feature);
-
-        // Custom menu order
-        menuManager.setMenu(Menu.newBuilder().
-                customize(true).
-                setBottom("recorder", "photo", Menu.TAG_EMOJI).build());
-        menuManager.setCustomMenuClickListener(new CustomMenuEventListener() {
+        chatInputView.initCostomMenu();
+        chatInputView.setRecorderQuickTouch(new CustomInputView.OnQuickRecorderListener() {
             @Override
-            public boolean onMenuItemClick(String tag, MenuItem menuItem) {
-                //Menu feature will not be show shown if return false；
+            public void onStartRecorder() {
+                Log.d("123", "onStartRecorder");
+            }
+
+            @Override
+            public void onStopRecorder() {
+                Log.d("123", "onStopRecorder");
+            }
+
+            @Override
+            public boolean onCancelRecorder() {
+                Log.d("123", "onCancelRecorder");
                 return true;
             }
-
-            @Override
-            public void onMenuFeatureVisibilityChanged(int visibility, String tag, MenuFeature menuFeature) {
-                if (visibility == View.VISIBLE) {
-                    // Menu feature is visible.
-                } else {
-                    // Menu feature is gone.
-                }
-            }
         });
-        chatInputView.setMenuClickListener(new OnMenuClickListenerWrapper());
+
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        ActivityResultHelper.getInstance().onActivityResult(requestCode, resultCode, data);
+    }
 
     @Override
     public void onBackPressed() {

@@ -2,6 +2,7 @@ package cn.jiguang.imui.chatinput.extra.input;
 
 import android.content.Context;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -45,7 +46,6 @@ public class CustomMenuManager {
 
     private void initCollection() {
         mMenuItemCollection = new CustomMenuItemCollection(mContext);
-
         mMenuItemCollection.setMenuCollectionChangedListener(new MenuCollection.MenuCollectionChangedListener() {
             @Override
             public void addMenu(String menuTag, View menu) {

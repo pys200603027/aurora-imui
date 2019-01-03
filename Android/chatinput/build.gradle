@@ -52,7 +52,7 @@ dependencies {
     implementation 'com.android.support:support-v4:27.1.0'
     testCompile 'junit:junit:4.12'
 
-    compileOnly (name:'matisse-debug', ext:'aar')
+    compileOnly (name:'matisse-debug-v1', ext:'aar')
 }
 
 apply from: 'android-release-aar.gradle'
