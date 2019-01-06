@@ -34,6 +34,6 @@ public class OnMenuClickListenerWrapper implements OnMenuClickListener {
 
     @Override
     public boolean switchToEmojiMode() {
-        return true;
+        return false;
     }
 }

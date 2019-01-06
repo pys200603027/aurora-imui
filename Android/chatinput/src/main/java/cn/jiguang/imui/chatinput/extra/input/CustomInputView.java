@@ -88,11 +88,6 @@ public class CustomInputView extends LinearLayout
     private OnSendClickListener sendClickListener;
     private OnSendTouchListener onSendTouchListener;
 
-    private ImageButton mVoiceBtn;
-    private ImageButton mPhotoBtn;
-    private ImageButton mCameraBtn;
-    private ImageButton mEmojiBtn;
-
     private LinearLayout mChatInputContainer;
     private LinearLayout mMenuItemContainer;
     private FrameLayout mMenuContainer;
@@ -122,8 +117,18 @@ public class CustomInputView extends LinearLayout
 
     private View mEmojiBtnContainer;
     private View quickRecoderContainer;
+    private TextView voiceQuickTimeLeft;
 
     private CustomMenuManager mMenuManager;
+    /**
+     * 录音面板是否已经打开
+     */
+    private boolean isRecorderMenuFeatureVisiable = false;
+    private boolean isPhtotMenuFeatureVisiable = false;
+    /**
+     * 是否是快速录制状态
+     */
+    boolean isShowQuickRecorderMode = false;
 
     public CustomInputView(Context context) {
         super(context);
@@ -159,10 +164,7 @@ public class CustomInputView extends LinearLayout
 
         // menu buttons
         mChatInput = (EmoticonsEditText) findViewById(R.id.aurora_et_chat_input);
-        mVoiceBtn = (ImageButton) findViewById(R.id.aurora_menuitem_ib_voice);
-        mPhotoBtn = (ImageButton) findViewById(R.id.aurora_menuitem_ib_photo);
-        mCameraBtn = (ImageButton) findViewById(R.id.aurora_menuitem_ib_camera);
-        mEmojiBtn = (ImageButton) findViewById(R.id.aurora_menuitem_ib_emoji);
+
 
         //btn
         mEmojiBtnContainer = findViewById(R.id.aurora_ll_menuitem_emoji_container);
@@ -193,6 +195,11 @@ public class CustomInputView extends LinearLayout
             }
         });
 
+
+        voiceQuickTimeLeft = findViewById(R.id.tv_quick_time);
+        /**
+         * about InputMethodManager
+         */
         mImm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
         mWindow = ((Activity) context).getWindow();
         DisplayMetrics dm = getResources().getDisplayMetrics();
@@ -208,7 +215,7 @@ public class CustomInputView extends LinearLayout
         // Custom menu order
         menuManager.setMenu(Menu.newBuilder().
                 customize(true).
-                setBottom("recorder", "photo", Menu.TAG_EMOJI).build());
+                setBottom("recorder", "photo").build());
         setMenuClickListener(new OnMenuClickListenerWrapper());
 
         menuManager.setCustomMenuClickListener(new CustomMenuEventListener() {
@@ -220,14 +227,55 @@ public class CustomInputView extends LinearLayout
 
             @Override
             public void onMenuFeatureVisibilityChanged(int visibility, String tag, MenuFeature menuFeature) {
-                if (visibility == View.VISIBLE) {
-                    // Menu feature is visible.
-                } else {
-                    // Menu feature is gone.
-                }
+                setRecorderMenuState(visibility, tag);
+                setPhotoMenuState(visibility, tag);
             }
         });
     }
+
+
+    public void setPhotoMenuState(int visibility, String tag) {
+        if (visibility == View.VISIBLE) {
+            // Menu feature is visible.
+            if (tag.equals("photo")) {
+                isPhtotMenuFeatureVisiable = true;
+                View rootView = getMenuManager().getMenuItemCollection().get("photo");
+                View menuRecorder = rootView.findViewById(R.id.tv_photo);
+                menuRecorder.setBackgroundResource(R.drawable.im_input_menu_photo_press);
+                setMenuContainerHeight(900);
+            }
+        } else {
+            // Menu feature is gone.
+            if (tag.equals("photo")) {
+                isPhtotMenuFeatureVisiable = false;
+                View rootView = getMenuManager().getMenuItemCollection().get("photo");
+                View menuRecorder = rootView.findViewById(R.id.tv_photo);
+                menuRecorder.setBackgroundResource(R.drawable.im_input_menu_img);
+            }
+        }
+    }
+
+
+    public void setRecorderMenuState(int visibility, String tag) {
+        if (visibility == View.VISIBLE) {
+            // Menu feature is visible.
+            if (tag.equals("recorder")) {
+                isRecorderMenuFeatureVisiable = true;
+                View rootView = getMenuManager().getMenuItemCollection().get("recorder");
+                View menuRecorder = rootView.findViewById(R.id.tv_voice_menu);
+                menuRecorder.setBackgroundResource(R.drawable.im_input_menu_voice_press);
+            }
+        } else {
+            // Menu feature is gone.
+            if (tag.equals("recorder")) {
+                isRecorderMenuFeatureVisiable = false;
+                View rootView = getMenuManager().getMenuItemCollection().get("recorder");
+                View menuRecorder = rootView.findViewById(R.id.tv_voice_menu);
+                menuRecorder.setBackgroundResource(R.drawable.im_input_menu_voice);
+            }
+        }
+    }
+
 
     public void setRecorderQuickTouch(OnQuickRecorderListener onQuickRecorderListener) {
         View recorderMenu = getMenuManager().getMenuItemCollection().get("recorder");
@@ -240,11 +288,21 @@ public class CustomInputView extends LinearLayout
             long startTime;
             private Handler handler = new Handler();
             final int PRESSREANGE = 500;
-            final int TOUCHRANGE = -10;
+            final int TOUCHRANGE = 20;
+            /**
+             * 是否移出到控件外
+             */
             boolean isOutofTouchRange = false;
+
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                /**
+                 * 如果录制页面已经打开，快捷录制将屏蔽
+                 */
+                if (isRecorderMenuFeatureVisiable) {
+                    return false;
+                }
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         isOutofTouchRange = false;
@@ -262,40 +320,52 @@ public class CustomInputView extends LinearLayout
 
                         break;
                     case MotionEvent.ACTION_MOVE:
-                        int lastY = (int) event.getY();
+                        int newY = (int) event.getY();
                         Rect rect = new Rect();
                         v.getLocalVisibleRect(rect);
-                        int bottom = rect.bottom + 10;
-
-                        if (lastY <= -TOUCHRANGE || lastY >= bottom) {
+                        int bottom = rect.bottom + TOUCHRANGE;
+                        /**
+                         * 判断按下区域
+                         * 1. 没有进入快速录制页，移除控件外外
+                         * 2. 正在快速录制中，移出控件外
+                         */
+                        if (newY <= -TOUCHRANGE || newY >= bottom) {
                             handler.removeCallbacksAndMessages(null);
                             isOutofTouchRange = true;
-//                            Log.w("123", "out of touch range");
                             if (onQuickRecorderListener != null) {
                                 onQuickRecorderListener.onCancelRecorder();
                             }
                             return true;
+                        } else {
+                            //从控件外又恢复到控件内
+                            if (isOutofTouchRange) {
+                                if (onQuickRecorderListener != null) {
+                                    onQuickRecorderListener.onResumeRecorder();
+                                }
+                                //在控件范围下移动
+                                isOutofTouchRange = false;
+                            }
                         }
-
                         break;
                     case MotionEvent.ACTION_UP:
                         handler.removeCallbacksAndMessages(null);
                         if (isShowQuickRecorderMode) {
                             showNormalMode();
                             if (onQuickRecorderListener != null) {
-                                onQuickRecorderListener.onStopRecorder();
+                                if (isOutofTouchRange) {
+                                    onQuickRecorderListener.onCancelStopRecorder();
+                                } else {
+                                    onQuickRecorderListener.onStopRecorder();
+                                }
                             }
                             return true;
-                        } else if (isOutofTouchRange) {
-                            showNormalMode();
-                            return true;
-                        } else {
-                            performClick();
                         }
+                        performClick();
                         break;
                     default:
                 }
-//                Log.d("123", "v.x" + event.getX() + ",v.y:" + event.getY());
+
+                Log.d("123", "v.x" + event.getX() + ",v.y:" + event.getY());
 //                Rect rect = new Rect();
 //                v.getLocalVisibleRect(rect);
 //                Log.d("123", "l:" + rect.left + ",top:" + rect.top + ",bottom:" + rect.bottom);
@@ -305,7 +375,6 @@ public class CustomInputView extends LinearLayout
         });
     }
 
-    boolean isShowQuickRecorderMode = false;
 
     private void showQuickRecorderMode() {
         quickRecoderContainer.setVisibility(VISIBLE);
@@ -701,6 +770,10 @@ public class CustomInputView extends LinearLayout
         mEditTextListener = listener;
     }
 
+    public TextView getVoiceQuickTimeLeft() {
+        return voiceQuickTimeLeft;
+    }
+
     public EditText getInputView() {
         return mChatInput;
     }
@@ -732,6 +805,10 @@ public class CustomInputView extends LinearLayout
         void onStopRecorder();
 
         boolean onCancelRecorder();
+
+        void onCancelStopRecorder();
+
+        void onResumeRecorder();
     }
 
 }

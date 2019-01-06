@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/aurora_bg_input_default"
+    android:background="#ffffff"
     android:orientation="vertical">
 
     <LinearLayout
@@ -16,9 +16,10 @@
         android:background="@drawable/im_input_bg"
         android:minHeight="40dp"
         android:orientation="horizontal"
-        tools:visibility="gone">
+        tools:visibility="visible">
 
         <cn.jiguang.imui.chatinput.emoji.widget.EmoticonsEditText
+            android:layout_gravity="center_vertical"
             android:id="@+id/aurora_et_chat_input"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -32,12 +33,12 @@
             android:maxLines="4"
             android:scrollbars="vertical"
             android:textColor="#3a3a3a"
-            android:textColorHint="#b3b3b3"
-            android:textSize="18sp" />
+            android:textColorHint="#c7c6c3"
+            android:textSize="13dp" />
 
         <LinearLayout
             android:id="@+id/aurora_ll_menuitem_container"
-            android:layout_width="100dp"
+            android:layout_width="80dp"
             android:layout_height="match_parent"
             android:layout_gravity="center_vertical"
             android:orientation="horizontal" />
@@ -53,7 +54,7 @@
             android:textSize="16dp"
             android:textStyle="bold"
             android:visibility="gone"
-            tools:visibility="visible" />
+            tools:visibility="gone" />
     </LinearLayout>
 
     <LinearLayout
@@ -66,8 +67,36 @@
         android:layout_marginBottom="11dp"
         android:background="@drawable/im_quick_recorder_bg"
         android:minHeight="40dp"
+        android:orientation="horizontal"
         android:visibility="gone"
-        android:orientation="horizontal" />
+        tools:visibility="gone">
+
+        <TextView
+            android:text="文字"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="10dp"
+            android:textSize="16dp"
+            android:gravity="center"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/tv_quick_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|center_vertical"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="15dp"
+            android:textColor="#ffffff"
+            android:textSize="13dp"
+            tools:text="60''" />
+    </LinearLayout>
+    
+    <View
+        android:background="#dfdfdf"
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"/>
 
     <FrameLayout
         android:id="@+id/aurora_fl_menu_container"

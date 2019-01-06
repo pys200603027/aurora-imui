@@ -33,6 +33,9 @@ public class Glide4Engine implements ImageEngine {
 
     @Override
     public void loadThumbnail(Context context, int resize, Drawable placeholder, ImageView imageView, Uri uri) {
+        if(context==null){
+            return;
+        }
         Glide.with(context)
                 .asBitmap() // some .jpeg files are actually gif
                 .load(uri)
@@ -44,8 +47,10 @@ public class Glide4Engine implements ImageEngine {
     }
 
     @Override
-    public void loadGifThumbnail(Context context, int resize, Drawable placeholder, ImageView imageView,
-                                 Uri uri) {
+    public void loadGifThumbnail(Context context, int resize, Drawable placeholder, ImageView imageView, Uri uri) {
+        if(context==null){
+            return;
+        }
         Glide.with(context)
                 .asBitmap() // some .jpeg files are actually gif
                 .load(uri)
@@ -58,6 +63,9 @@ public class Glide4Engine implements ImageEngine {
 
     @Override
     public void loadImage(Context context, int resizeX, int resizeY, ImageView imageView, Uri uri) {
+        if(context==null){
+            return;
+        }
         Glide.with(context)
                 .load(uri)
                 .apply(new RequestOptions()
@@ -69,6 +77,9 @@ public class Glide4Engine implements ImageEngine {
 
     @Override
     public void loadGifImage(Context context, int resizeX, int resizeY, ImageView imageView, Uri uri) {
+        if(context==null){
+            return;
+        }
         Glide.with(context)
                 .asGif()
                 .load(uri)
