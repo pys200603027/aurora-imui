@@ -86,6 +86,16 @@ public class SimpeInputActivity extends AppCompatActivity {
                 Log.d("123", "onCancelRecorder");
                 return true;
             }
+
+            @Override
+            public void onCancelStopRecorder() {
+                Log.d("123", "onCancelStopRecorder");
+            }
+
+            @Override
+            public void onResumeRecorder() {
+                Log.d("123", "onResumeRecorder");
+            }
         });
 
     }
