@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "imui.jiguang.cn.imuisample"
-        minSdkVersion 16
+        minSdkVersion 21
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
@@ -50,6 +50,10 @@ android {
         main {
             assets.srcDirs = ['assets']
         }
+    }
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
     }
 }
 

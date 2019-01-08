@@ -11,9 +11,11 @@ import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.method.KeyListener;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -130,6 +132,8 @@ public class CustomInputView extends LinearLayout
      */
     boolean isShowQuickRecorderMode = false;
 
+    private TextView qcTipView;
+
     public CustomInputView(Context context) {
         super(context);
         init(context);
@@ -158,6 +162,7 @@ public class CustomInputView extends LinearLayout
         mMenuContainer = (FrameLayout) findViewById(R.id.aurora_fl_menu_container);
 
         quickRecoderContainer = findViewById(R.id.quick_recorder);
+        qcTipView = findViewById(R.id.tv_qc_tip);
 
 
         mMenuManager = new CustomMenuManager(this);
@@ -210,12 +215,16 @@ public class CustomInputView extends LinearLayout
     public void initCostomMenu() {
         CustomMenuManager menuManager = getMenuManager();
         menuManager.addCustomMenu("recorder", R.layout.im_menu_voice_item, R.layout.im_menu_voice_feature);
-        menuManager.addCustomMenu("photo", R.layout.im_menu_photo_item, R.layout.im_menu_photo_feature);
+//        menuManager.addCustomMenu("photo", R.layout.im_menu_photo_item, R.layout.im_menu_photo_feature);
 
         // Custom menu order
+//        menuManager.setMenu(Menu.newBuilder().
+//                customize(true).
+//                setBottom("recorder", "photo").build());
+
         menuManager.setMenu(Menu.newBuilder().
                 customize(true).
-                setBottom("recorder", "photo").build());
+                setBottom("recorder").build());
         setMenuClickListener(new OnMenuClickListenerWrapper());
 
         menuManager.setCustomMenuClickListener(new CustomMenuEventListener() {
@@ -331,11 +340,11 @@ public class CustomInputView extends LinearLayout
                          */
                         if (newY <= -TOUCHRANGE || newY >= bottom) {
                             handler.removeCallbacksAndMessages(null);
+                            qcTipView.setText("松开    取消");
                             isOutofTouchRange = true;
                             if (onQuickRecorderListener != null) {
                                 onQuickRecorderListener.onCancelRecorder();
                             }
-                            return true;
                         } else {
                             //从控件外又恢复到控件内
                             if (isOutofTouchRange) {
@@ -344,10 +353,12 @@ public class CustomInputView extends LinearLayout
                                 }
                                 //在控件范围下移动
                                 isOutofTouchRange = false;
+                                qcTipView.setText("松开    结束");
                             }
                         }
-                        break;
+                        return true;
                     case MotionEvent.ACTION_UP:
+                    case MotionEvent.ACTION_CANCEL:
                         handler.removeCallbacksAndMessages(null);
                         if (isShowQuickRecorderMode) {
                             showNormalMode();
@@ -365,6 +376,7 @@ public class CustomInputView extends LinearLayout
                     default:
                 }
 
+                Log.d("123", "action:" + event.getAction());
                 Log.d("123", "v.x" + event.getX() + ",v.y:" + event.getY());
 //                Rect rect = new Rect();
 //                v.getLocalVisibleRect(rect);
@@ -377,6 +389,7 @@ public class CustomInputView extends LinearLayout
 
 
     private void showQuickRecorderMode() {
+        qcTipView.setText("松开    结束");
         quickRecoderContainer.setVisibility(VISIBLE);
         mChatInputContainer.setVisibility(GONE);
         isShowQuickRecorderMode = true;
@@ -663,6 +676,7 @@ public class CustomInputView extends LinearLayout
     public boolean onPreDraw() {
         if (mPendingShowMenu) {
             if (isKeyboardVisible()) {
+                Log.w(TAG, "isKeyboardVisible=true");
                 ViewGroup.LayoutParams params = mMenuContainer.getLayoutParams();
                 int distance = getDistanceFromInputToBottom();
                 Log.d(TAG, "Distance from bottom: " + distance);
@@ -673,12 +687,14 @@ public class CustomInputView extends LinearLayout
                 }
                 return false;
             } else {
+                Log.w(TAG, "isKeyboardVisible=false");
                 showMenuLayout();
                 mPendingShowMenu = false;
                 return false;
             }
         } else {
             if (mMenuContainer.getVisibility() == VISIBLE && isKeyboardVisible()) {
+                Log.d(TAG, "VISIBLE && isKeyboardVisible");
                 dismissMenuLayout();
                 return false;
             }
@@ -776,6 +792,20 @@ public class CustomInputView extends LinearLayout
 
     public EditText getInputView() {
         return mChatInput;
+    }
+
+
+    public void hintKeyBoard() {
+        //拿到InputMethodManager
+        InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        //如果window上view获取焦点 && view不为空
+        if (imm.isActive() && mChatInput != null) {
+            //拿到view的token 不为空
+            if (mChatInput.getWindowToken() != null) {
+                //表示软键盘窗口总是隐藏，除非开始时以SHOW_FORCED显示。
+                imm.hideSoftInputFromWindow(mChatInput.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+            }
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
