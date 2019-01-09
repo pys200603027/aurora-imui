@@ -52,26 +52,26 @@ public class SimpeInputActivity extends AppCompatActivity {
          * Should set menu container height once the ChatInputView has been initialized.
          * For perfect display, the height should be equals with soft input height.
          */
-        chatInputView.setMenuContainerHeight(587);
-        chatInputView.setPendingShowMenu(true);
+        chatInputView.setMenuContainerHeight(400);
+//        chatInputView.setPendingShowMenu(true);
 
 //        // add Custom Menu View
-//        Matisse.from(this)
-//                .choose(MimeType.ofImage())
-//                .countable(false)
-//                .addFilter(new GifSizeFilter(320, 320, 5 * Filter.K * Filter.K))
-//                .maxSelectable(9)
-//                .originalEnable(true)
-//                .maxOriginalSize(10)
-//                .imageEngine(new Glide4Engine())
-//                .forCallback(new OnResultListener() {
-//                    @Override
-//                    public void onResult(int i, Intent intent) {
-//                        Log.d("123", "i:" + i);
-//                        List<Uri> uris = Matisse.obtainResult(intent);
-//                        imageEngine.loadImage(imageView.getContext(), imageView.getWidth(), imageView.getHeight(), imageView, uris.get(0));
-//                    }
-//                });
+        Matisse.from(this)
+                .choose(MimeType.ofImage())
+                .countable(false)
+                .addFilter(new GifSizeFilter(320, 320, 5 * Filter.K * Filter.K))
+                .maxSelectable(9)
+                .originalEnable(true)
+                .maxOriginalSize(10)
+                .imageEngine(new Glide4Engine())
+                .forCallback(new OnResultListener() {
+                    @Override
+                    public void onResult(int i, Intent intent) {
+                        Log.d("123", "i:" + i);
+                        List<Uri> uris = Matisse.obtainResult(intent);
+                        imageEngine.loadImage(imageView.getContext(), imageView.getWidth(), imageView.getHeight(), imageView, uris.get(0));
+                    }
+                });
         chatInputView.initCostomMenu();
         chatInputView.setRecorderQuickTouch(new CustomInputView.OnQuickRecorderListener() {
             @Override
