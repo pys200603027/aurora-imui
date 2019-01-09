@@ -3,55 +3,32 @@ package cn.jiguang.imui.chatinput.extra.input;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Rect;
-import android.graphics.SurfaceTexture;
 import android.graphics.drawable.Drawable;
-import android.hardware.Camera;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
-import android.os.Build;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.support.annotation.NonNull;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.text.method.KeyListener;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
-import android.view.Gravity;
 import android.view.MotionEvent;
-import android.view.Surface;
-import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
-import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
 
 import cn.jiguang.imui.chatinput.R;
-import cn.jiguang.imui.chatinput.camera.CameraNew;
-import cn.jiguang.imui.chatinput.camera.CameraOld;
-import cn.jiguang.imui.chatinput.camera.CameraSupport;
 import cn.jiguang.imui.chatinput.emoji.Constants;
 import cn.jiguang.imui.chatinput.emoji.EmojiBean;
 import cn.jiguang.imui.chatinput.emoji.EmojiView;
@@ -59,22 +36,12 @@ import cn.jiguang.imui.chatinput.emoji.EmoticonsKeyboardUtils;
 import cn.jiguang.imui.chatinput.emoji.data.EmoticonEntity;
 import cn.jiguang.imui.chatinput.emoji.listener.EmoticonClickListener;
 import cn.jiguang.imui.chatinput.emoji.widget.EmoticonsEditText;
-import cn.jiguang.imui.chatinput.listener.CameraControllerListener;
-import cn.jiguang.imui.chatinput.listener.CameraEventListener;
 import cn.jiguang.imui.chatinput.listener.CustomMenuEventListener;
-import cn.jiguang.imui.chatinput.listener.OnCameraCallbackListener;
 import cn.jiguang.imui.chatinput.listener.OnClickEditTextListener;
-import cn.jiguang.imui.chatinput.listener.OnFileSelectedListener;
 import cn.jiguang.imui.chatinput.listener.OnMenuClickListener;
-import cn.jiguang.imui.chatinput.listener.RecordVoiceListener;
 import cn.jiguang.imui.chatinput.menu.Menu;
 import cn.jiguang.imui.chatinput.menu.view.MenuFeature;
 import cn.jiguang.imui.chatinput.menu.view.MenuItem;
-import cn.jiguang.imui.chatinput.model.FileItem;
-import cn.jiguang.imui.chatinput.model.VideoItem;
-import cn.jiguang.imui.chatinput.record.ProgressButton;
-import cn.jiguang.imui.chatinput.record.RecordControllerView;
-import cn.jiguang.imui.chatinput.record.RecordVoiceButton;
 import cn.jiguang.imui.chatinput.utils.SimpleCommonUtils;
 
 public class CustomInputView extends LinearLayout
@@ -215,17 +182,17 @@ public class CustomInputView extends LinearLayout
     public void initCostomMenu() {
         CustomMenuManager menuManager = getMenuManager();
         menuManager.addCustomMenu("recorder", R.layout.im_menu_voice_item, R.layout.im_menu_voice_feature);
-//        menuManager.addCustomMenu("photo", R.layout.im_menu_photo_item, R.layout.im_menu_photo_feature);
+        menuManager.addCustomMenu("photo", R.layout.im_menu_photo_item, R.layout.im_menu_photo_feature);
 
         // Custom menu order
-//        menuManager.setMenu(Menu.newBuilder().
-//                customize(true).
-//                setBottom("recorder", "photo").build());
-
         menuManager.setMenu(Menu.newBuilder().
                 customize(true).
-                setBottom("recorder").build());
-        setMenuClickListener(new OnMenuClickListenerWrapper());
+                setBottom("recorder", "photo").build());
+
+//        menuManager.setMenu(Menu.newBuilder().
+//                customize(true).
+//                setBottom("recorder").build());
+//        setMenuClickListener(new OnMenuClickListenerWrapper());
 
         menuManager.setCustomMenuClickListener(new CustomMenuEventListener() {
             @Override
@@ -251,7 +218,8 @@ public class CustomInputView extends LinearLayout
                 View rootView = getMenuManager().getMenuItemCollection().get("photo");
                 View menuRecorder = rootView.findViewById(R.id.tv_photo);
                 menuRecorder.setBackgroundResource(R.drawable.im_input_menu_photo_press);
-                setMenuContainerHeight(900);
+
+                setMenuContainerHeight(600);
             }
         } else {
             // Menu feature is gone.
@@ -273,6 +241,8 @@ public class CustomInputView extends LinearLayout
                 View rootView = getMenuManager().getMenuItemCollection().get("recorder");
                 View menuRecorder = rootView.findViewById(R.id.tv_voice_menu);
                 menuRecorder.setBackgroundResource(R.drawable.im_input_menu_voice_press);
+
+                setMenuContainerHeight(300);
             }
         } else {
             // Menu feature is gone.
@@ -677,14 +647,15 @@ public class CustomInputView extends LinearLayout
         if (mPendingShowMenu) {
             if (isKeyboardVisible()) {
                 Log.w(TAG, "isKeyboardVisible=true");
-                ViewGroup.LayoutParams params = mMenuContainer.getLayoutParams();
-                int distance = getDistanceFromInputToBottom();
-                Log.d(TAG, "Distance from bottom: " + distance);
-                if (distance < mHeight / 2 && distance > 300 && distance != params.height) {
-                    params.height = distance;
-                    mSoftKeyboardHeight = distance;
-                    mMenuContainer.setLayoutParams(params);
-                }
+//                ViewGroup.LayoutParams params = mMenuContainer.getLayoutParams();
+//                int distance = getDistanceFromInputToBottom();
+//                Log.d(TAG, "Distance from bottom: " + distance);
+//
+//                if (distance < mHeight / 2 && distance > 300 && distance != params.height) {
+//                    params.height = distance;
+//                    mSoftKeyboardHeight = distance;
+//                    mMenuContainer.setLayoutParams(params);
+//                }
                 return false;
             } else {
                 Log.w(TAG, "isKeyboardVisible=false");
