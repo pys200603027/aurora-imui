@@ -13,11 +13,13 @@ import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -27,6 +29,8 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import cn.jiguang.imui.chatinput.R;
 import cn.jiguang.imui.chatinput.emoji.Constants;
@@ -47,6 +51,9 @@ import cn.jiguang.imui.chatinput.utils.SimpleCommonUtils;
 public class CustomInputView extends LinearLayout
         implements View.OnClickListener, TextWatcher, ViewTreeObserver.OnPreDrawListener {
 
+    public static final int MULTI_MODE = 0x1;
+    public static final int SEND_MODE = 0x2;
+
     private static final String TAG = "ChatInputView";
     private EmoticonsEditText mChatInput;
     private CharSequence mInput;
@@ -56,6 +63,7 @@ public class CustomInputView extends LinearLayout
     private TextView sendBtn;
     private OnSendClickListener sendClickListener;
     private OnSendTouchListener onSendTouchListener;
+    private OnInputModeChangeListener onInputModeChangeListener;
 
     private LinearLayout mChatInputContainer;
     private LinearLayout mMenuItemContainer;
@@ -147,26 +155,27 @@ public class CustomInputView extends LinearLayout
         mMenuContainer.setVisibility(GONE);
 
         mChatInput.addTextChangedListener(this);
-        mChatInput.setOnBackKeyClickListener(new EmoticonsEditText.OnBackKeyClickListener() {
-            @Override
-            public void onBackKeyClick() {
-                if (mMenuContainer.getVisibility() == VISIBLE) {
-                    dismissMenuLayout();
-                } else if (isKeyboardVisible()) {
-                    EmoticonsKeyboardUtils.closeSoftKeyboard(mChatInput);
-                }
-            }
-        });
-        mChatInput.setOnTouchListener(new OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (onSendTouchListener != null) {
-                    onSendTouchListener.onEditTouch();
-                }
-                return false;
+        mChatInput.setOnBackKeyClickListener(() -> {
+            if (mMenuContainer.getVisibility() == VISIBLE) {
+                dismissMenuLayout();
+            } else if (isKeyboardVisible()) {
+                EmoticonsKeyboardUtils.closeSoftKeyboard(mChatInput);
             }
         });
 
+        mChatInput.setOnTouchListener((v, event) -> {
+            Log.d("123", "onTouch event:" + event);
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                if (onSendTouchListener != null) {
+                    onSendTouchListener.onEditTouch();
+                }
+                //自己控制键盘弹出
+                showKeyBoard();
+            } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                performClick();
+            }
+            return false;
+        });
 
         voiceQuickTimeLeft = findViewById(R.id.tv_quick_time);
         /**
@@ -179,6 +188,7 @@ public class CustomInputView extends LinearLayout
         getViewTreeObserver().addOnPreDrawListener(this);
     }
 
+
     public void initCostomMenu() {
         CustomMenuManager menuManager = getMenuManager();
         menuManager.addCustomMenu("recorder", R.layout.im_menu_voice_item, R.layout.im_menu_voice_feature);
@@ -188,12 +198,6 @@ public class CustomInputView extends LinearLayout
         menuManager.setMenu(Menu.newBuilder().
                 customize(true).
                 setBottom("recorder", "photo").build());
-
-//        menuManager.setMenu(Menu.newBuilder().
-//                customize(true).
-//                setBottom("recorder").build());
-//        setMenuClickListener(new OnMenuClickListenerWrapper());
-
         menuManager.setCustomMenuClickListener(new CustomMenuEventListener() {
             @Override
             public boolean onMenuItemClick(String tag, MenuItem menuItem) {
@@ -203,14 +207,14 @@ public class CustomInputView extends LinearLayout
 
             @Override
             public void onMenuFeatureVisibilityChanged(int visibility, String tag, MenuFeature menuFeature) {
-                setRecorderMenuState(visibility, tag);
-                setPhotoMenuState(visibility, tag);
+                setRecorderMenuState(visibility, tag, 300);
+                setPhotoMenuState(visibility, tag, 600);
             }
         });
     }
 
 
-    public void setPhotoMenuState(int visibility, String tag) {
+    public void setPhotoMenuState(int visibility, String tag, int customHeight) {
         if (visibility == View.VISIBLE) {
             // Menu feature is visible.
             if (tag.equals("photo")) {
@@ -219,7 +223,9 @@ public class CustomInputView extends LinearLayout
                 View menuRecorder = rootView.findViewById(R.id.tv_photo);
                 menuRecorder.setBackgroundResource(R.drawable.im_input_menu_photo_press);
 
-                setMenuContainerHeight(600);
+                if (customHeight > 0) {
+                    setMenuContainerHeight(customHeight);
+                }
             }
         } else {
             // Menu feature is gone.
@@ -233,7 +239,7 @@ public class CustomInputView extends LinearLayout
     }
 
 
-    public void setRecorderMenuState(int visibility, String tag) {
+    public void setRecorderMenuState(int visibility, String tag, int customHeight) {
         if (visibility == View.VISIBLE) {
             // Menu feature is visible.
             if (tag.equals("recorder")) {
@@ -241,8 +247,9 @@ public class CustomInputView extends LinearLayout
                 View rootView = getMenuManager().getMenuItemCollection().get("recorder");
                 View menuRecorder = rootView.findViewById(R.id.tv_voice_menu);
                 menuRecorder.setBackgroundResource(R.drawable.im_input_menu_voice_press);
-
-                setMenuContainerHeight(300);
+                if (customHeight > 0) {
+                    setMenuContainerHeight(customHeight);
+                }
             }
         } else {
             // Menu feature is gone.
@@ -323,7 +330,7 @@ public class CustomInputView extends LinearLayout
                                 }
                                 //在控件范围下移动
                                 isOutofTouchRange = false;
-                                qcTipView.setText("松开    结束");
+                                qcTipView.setText("松开    发送");
                             }
                         }
                         return true;
@@ -359,7 +366,7 @@ public class CustomInputView extends LinearLayout
 
 
     private void showQuickRecorderMode() {
-        qcTipView.setText("松开    结束");
+        qcTipView.setText("松开    发送");
         quickRecoderContainer.setVisibility(VISIBLE);
         mChatInputContainer.setVisibility(GONE);
         isShowQuickRecorderMode = true;
@@ -436,6 +443,10 @@ public class CustomInputView extends LinearLayout
     private void switchSendMode() {
         sendBtn.setVisibility(VISIBLE);
         mMenuItemContainer.setVisibility(GONE);
+        if (onInputModeChangeListener != null) {
+            onInputModeChangeListener.onSwitchInputMode(SEND_MODE);
+        }
+
     }
 
     /**
@@ -444,6 +455,9 @@ public class CustomInputView extends LinearLayout
     private void switchMultiMode() {
         sendBtn.setVisibility(GONE);
         mMenuItemContainer.setVisibility(VISIBLE);
+        if (onInputModeChangeListener != null) {
+            onInputModeChangeListener.onSwitchInputMode(MULTI_MODE);
+        }
     }
 
     @Override
@@ -706,7 +720,6 @@ public class CustomInputView extends LinearLayout
     @Override
     public void requestLayout() {
         super.requestLayout();
-
         // React Native Override requestLayout, since we refresh our layout in native,
         // RN catch the
         // requestLayout event, so that the view won't refresh at once, we simulate
@@ -766,18 +779,21 @@ public class CustomInputView extends LinearLayout
     }
 
 
-    public void hintKeyBoard() {
-        //拿到InputMethodManager
-        InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        //如果window上view获取焦点 && view不为空
-        if (imm.isActive() && mChatInput != null) {
-            //拿到view的token 不为空
-            if (mChatInput.getWindowToken() != null) {
-                //表示软键盘窗口总是隐藏，除非开始时以SHOW_FORCED显示。
-                imm.hideSoftInputFromWindow(mChatInput.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+    public void showKeyBoard() {
+        if (mChatInput != null) {
+            mChatInput.setFocusable(true);
+            mChatInput.setFocusableInTouchMode(true);
+            mChatInput.requestFocus();
+            try {
+                InputMethodManager inputManager = (InputMethodManager) mChatInput.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputManager.showSoftInput(mChatInput, 0);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
+
     }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -791,6 +807,13 @@ public class CustomInputView extends LinearLayout
         this.onSendTouchListener = onSendTouchListener;
     }
 
+    public void setOnInputModeChangeListener(OnInputModeChangeListener onInputModeChangeListener) {
+        this.onInputModeChangeListener = onInputModeChangeListener;
+    }
+
+    public interface OnInputModeChangeListener {
+        void onSwitchInputMode(int mode);
+    }
 
     public interface OnSendClickListener {
         void onSendText(String o);

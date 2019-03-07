@@ -48,6 +48,8 @@ dependencies {
     implementation project(':messagelist')
     implementation project(':chatinput')
 
+    implementation 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:2.2.0'
+
     implementation (name:'matisse-debug-v1', ext:'aar')
 
 }

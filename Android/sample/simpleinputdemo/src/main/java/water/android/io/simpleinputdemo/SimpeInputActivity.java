@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import com.zhihu.matisse.Matisse;
 import com.zhihu.matisse.MimeType;
@@ -15,6 +16,10 @@ import com.zhihu.matisse.engine.ImageEngine;
 import com.zhihu.matisse.filter.Filter;
 import com.zhihu.matisse.listener.OnResultListener;
 import com.zhihu.matisse.ui.ActivityResultHelper;
+
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener;
+import net.yslibrary.android.keyboardvisibilityevent.Unregistrar;
 
 import java.util.List;
 
@@ -24,6 +29,7 @@ import cn.jiguang.imui.chatinput.extra.input.GifSizeFilter;
 import cn.jiguang.imui.chatinput.extra.input.Glide4Engine;
 import cn.jiguang.imui.chatinput.extra.input.OnMenuClickListenerWrapper;
 import cn.jiguang.imui.chatinput.listener.CustomMenuEventListener;
+import cn.jiguang.imui.chatinput.listener.OnClickEditTextListener;
 import cn.jiguang.imui.chatinput.menu.Menu;
 import cn.jiguang.imui.chatinput.menu.view.MenuFeature;
 import cn.jiguang.imui.chatinput.menu.view.MenuItem;
@@ -35,10 +41,11 @@ public class SimpeInputActivity extends AppCompatActivity {
 
     CustomInputView chatInputView;
     ImageView imageView;
-    private static final int REQUEST_CODE_CHOOSE = 23;
+    LinearLayout bottomBar;
 
-    private final int RC_PHOTO = 0x0003;
     ImageEngine imageEngine = new Glide4Engine();
+
+    Unregistrar unregistrar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,15 +54,9 @@ public class SimpeInputActivity extends AppCompatActivity {
         chatInputView = findViewById(R.id.chat_input);
         imageView = findViewById(R.id.img);
 
-        int height = getWindow().getDecorView().getHeight() * 3 / 4;
-        /**
-         * Should set menu container height once the ChatInputView has been initialized.
-         * For perfect display, the height should be equals with soft input height.
-         */
+        bottomBar = findViewById(R.id.ll_bottom_bar);
         chatInputView.setMenuContainerHeight(400);
-//        chatInputView.setPendingShowMenu(true);
 
-//        // add Custom Menu View
         Matisse.from(this)
                 .choose(MimeType.ofImage())
                 .countable(false)
@@ -64,13 +65,10 @@ public class SimpeInputActivity extends AppCompatActivity {
                 .originalEnable(true)
                 .maxOriginalSize(10)
                 .imageEngine(new Glide4Engine())
-                .forCallback(new OnResultListener() {
-                    @Override
-                    public void onResult(int i, Intent intent) {
-                        Log.d("123", "i:" + i);
-                        List<Uri> uris = Matisse.obtainResult(intent);
-                        imageEngine.loadImage(imageView.getContext(), imageView.getWidth(), imageView.getHeight(), imageView, uris.get(0));
-                    }
+                .forCallback((i, intent) -> {
+                    Log.d("123", "i:" + i);
+                    List<Uri> uris = Matisse.obtainResult(intent);
+                    imageEngine.loadImage(imageView.getContext(), imageView.getWidth(), imageView.getHeight(), imageView, uris.get(0));
                 });
         chatInputView.initCostomMenu();
         chatInputView.setRecorderQuickTouch(new CustomInputView.OnQuickRecorderListener() {
@@ -101,6 +99,33 @@ public class SimpeInputActivity extends AppCompatActivity {
             }
         });
 
+
+        unregistrar = KeyboardVisibilityEvent.registerEventListener(this, isOpen -> {
+            if (isOpen) {
+                bottomBar.setVisibility(View.GONE);
+            } else {
+                bottomBar.postDelayed(() -> {
+                    bottomBar.setVisibility(View.VISIBLE);
+                }, 300);
+            }
+        });
+
+        chatInputView.setOnSendTouchListener(new CustomInputView.OnSendTouchListener() {
+            @Override
+            public void onEditTouch() {
+                bottomBar.setVisibility(View.GONE);
+            }
+        });
+
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (unregistrar != null) {
+            unregistrar.unregister();
+        }
     }
 
     @Override
