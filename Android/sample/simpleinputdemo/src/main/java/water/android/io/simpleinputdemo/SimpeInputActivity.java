@@ -73,6 +73,11 @@ public class SimpeInputActivity extends AppCompatActivity {
         chatInputView.initCostomMenu();
         chatInputView.setRecorderQuickTouch(new CustomInputView.OnQuickRecorderListener() {
             @Override
+            public boolean onTouchSkipFilter() {
+                return true;
+            }
+
+            @Override
             public void onStartRecorder() {
                 Log.d("123", "onStartRecorder");
             }
