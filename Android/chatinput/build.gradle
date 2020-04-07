@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply from: 'upload_nexus.gradle'
 
 ext {
     PUBLISH_GROUP_ID = 'cn.jiguang.imui'
