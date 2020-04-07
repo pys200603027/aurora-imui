@@ -13,13 +13,11 @@ import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -29,8 +27,6 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import cn.jiguang.imui.chatinput.R;
 import cn.jiguang.imui.chatinput.emoji.Constants;
@@ -48,6 +44,11 @@ import cn.jiguang.imui.chatinput.menu.view.MenuFeature;
 import cn.jiguang.imui.chatinput.menu.view.MenuItem;
 import cn.jiguang.imui.chatinput.utils.SimpleCommonUtils;
 
+/**
+ * fork了一份，进行了魔改
+ * 地址：https://github.com/pys200603027/aurora-imui.git
+ * 分支：dev
+ */
 public class CustomInputView extends LinearLayout
         implements View.OnClickListener, TextWatcher, ViewTreeObserver.OnPreDrawListener {
 
@@ -108,6 +109,8 @@ public class CustomInputView extends LinearLayout
     boolean isShowQuickRecorderMode = false;
 
     private TextView qcTipView;
+
+    private View devideLine;
 
     public CustomInputView(Context context) {
         super(context);
@@ -176,6 +179,9 @@ public class CustomInputView extends LinearLayout
             }
             return false;
         });
+
+
+        devideLine = findViewById(R.id.aurara_fl_devide_line);
 
         voiceQuickTimeLeft = findViewById(R.id.tv_quick_time);
         /**
@@ -283,6 +289,12 @@ public class CustomInputView extends LinearLayout
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                //过滤器，不响应
+                if (onQuickRecorderListener != null) {
+                    if (onQuickRecorderListener.onTouchSkipFilter()) {
+                        return false;
+                    }
+                }
                 /**
                  * 如果录制页面已经打开，快捷录制将屏蔽
                  */
@@ -794,6 +806,17 @@ public class CustomInputView extends LinearLayout
 
     }
 
+    /**
+     * 隐藏底部
+     */
+    public void hideBottomLine() {
+        devideLine.setVisibility(View.GONE);
+    }
+
+    public void setBackground2() {
+        mChatInputContainer.setBackgroundResource(R.drawable.im_input_bg_2);
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -824,6 +847,9 @@ public class CustomInputView extends LinearLayout
     }
 
     public interface OnQuickRecorderListener {
+
+        boolean onTouchSkipFilter();
+
         void onStartRecorder();
 
         void onStopRecorder();
